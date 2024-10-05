@@ -165,7 +165,7 @@ impl EncryptedGroupSecrets {
 /// } Commit;
 /// ```
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize, TlsSerialize, TlsSize)]
-pub(crate) struct Commit {
+pub struct Commit {
     pub(crate) proposals: Vec<ProposalOrRef>,
     pub(crate) path: Option<UpdatePath>,
 }

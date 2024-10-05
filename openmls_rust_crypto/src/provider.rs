@@ -23,7 +23,7 @@ use p256::{
     EncodedPoint,
 };
 use rand::{RngCore, SeedableRng};
-use sha2::{Digest, Sha256, Sha384, Sha512};
+use sha2::{digest::OutputSizeUser, Digest, Sha256, Sha384, Sha512};
 use tls_codec::SecretVLBytes;
 
 #[derive(Debug)]
@@ -121,11 +121,22 @@ impl OpenMlsCrypto for RustCrypto {
     ) -> Result<SecretVLBytes, openmls_traits::types::CryptoError> {
         match hash_type {
             HashType::Sha2_256 => {
-                let hkdf = Hkdf::<Sha256>::from_prk(prk)
-                    .map_err(|_| CryptoError::HkdfOutputLengthInvalid)?;
+                use aes_gcm::aes::cipher::Unsigned;
+                println!(
+                    "{},{}",
+                    prk.len(),
+                    <Sha256 as OutputSizeUser>::OutputSize::to_usize()
+                );
+
+                let hkdf = Hkdf::<Sha256>::from_prk(prk).map_err(|e| {
+                    println!("{e:?}");
+                    CryptoError::HkdfOutputLengthInvalid
+                })?;
                 let mut okm = vec![0u8; okm_len];
-                hkdf.expand(info, &mut okm)
-                    .map_err(|_| CryptoError::HkdfOutputLengthInvalid)?;
+                hkdf.expand(info, &mut okm).map_err(|e| {
+                    println!("{e:?}");
+                    CryptoError::HkdfOutputLengthInvalid
+                })?;
                 Ok(okm.into())
             }
             HashType::Sha2_512 => {

@@ -82,7 +82,7 @@ impl FramedContentAuthData {
 #[derive(PartialEq, Debug, Clone, TlsSerialize, TlsSize)]
 pub(crate) struct AuthenticatedContent {
     pub(super) wire_format: WireFormat,
-    pub(super) content: FramedContent,
+    pub content: FramedContent,
     pub(super) auth: FramedContentAuthData,
 }
 

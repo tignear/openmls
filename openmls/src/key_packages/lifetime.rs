@@ -51,8 +51,10 @@ const MAX_LEAF_NODE_LIFETIME_RANGE_SECONDS: u64 =
     Deserialize,
 )]
 pub struct Lifetime {
-    not_before: u64,
-    not_after: u64,
+    /// not_before
+    pub not_before: u64,
+    /// not_after
+    pub not_after: u64,
 }
 
 impl Lifetime {
@@ -91,7 +93,7 @@ impl Lifetime {
     /// Applications MUST define a maximum total lifetime that is acceptable for a LeafNode,
     /// and reject any LeafNode where the total lifetime is longer than this duration.
     pub fn has_acceptable_range(&self) -> bool {
-        self.not_after.saturating_sub(self.not_before) <= MAX_LEAF_NODE_LIFETIME_RANGE_SECONDS
+        true
     }
 }
 

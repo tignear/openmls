@@ -11,7 +11,7 @@ use super::{kdf_label::KdfLabel, *};
 /// Note: This has a hand-written `Debug` implementation.
 ///       Please update as well when changing this struct.
 #[derive(Clone, Serialize, Deserialize, Eq)]
-pub(crate) struct Secret {
+pub struct Secret {
     pub(in crate::ciphersuite) value: SecretVLBytes,
 }
 
@@ -73,7 +73,7 @@ impl Secret {
     }
 
     /// Create a new secret from a byte vector.
-    pub(crate) fn from_slice(bytes: &[u8]) -> Self {
+    pub fn from_slice(bytes: &[u8]) -> Self {
         Secret {
             value: bytes.into(),
         }

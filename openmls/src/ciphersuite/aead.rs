@@ -11,7 +11,8 @@ pub(crate) const NONCE_BYTES: usize = 12;
 #[cfg_attr(feature = "crypto-debug", derive(Debug))]
 pub struct AeadKey {
     aead_mode: AeadType,
-    value: SecretVLBytes,
+    /// aead key
+    pub value: SecretVLBytes,
 }
 
 #[cfg(not(feature = "crypto-debug"))]
@@ -27,7 +28,7 @@ impl core::fmt::Debug for AeadKey {
 /// AEAD Nonce
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "crypto-debug", derive(Debug))]
-pub(crate) struct AeadNonce([u8; NONCE_BYTES]);
+pub struct AeadNonce([u8; NONCE_BYTES]);
 
 #[cfg(not(feature = "crypto-debug"))]
 impl core::fmt::Debug for AeadNonce {

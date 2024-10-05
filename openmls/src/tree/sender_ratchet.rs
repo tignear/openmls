@@ -16,7 +16,7 @@ use crate::tree::secret_tree::*;
 use super::*;
 
 /// The generation of a given [`SenderRatchet`].
-pub(crate) type Generation = u32;
+pub type Generation = u32;
 /// Stores the configuration parameters for `DecryptionRatchet`s.
 ///
 /// **Parameters**
@@ -62,7 +62,7 @@ impl Default for SenderRatchetConfiguration {
 
 /// The key material derived from a [`RatchetSecret`] meant for use with a
 /// nonce-based symmetric encryption scheme.
-pub(crate) type RatchetKeyMaterial = (AeadKey, AeadNonce);
+pub type RatchetKeyMaterial = (AeadKey, AeadNonce);
 
 /// A ratchet that can output key material either for encryption
 /// ([`EncryptionRatchet`](SenderRatchet)) or decryption
@@ -94,7 +94,7 @@ impl SenderRatchet {
 /// [`RatchetKeyMaterial`] and increasing its [`Generation`] each time.
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[cfg_attr(any(feature = "test-utils", test), derive(PartialEq, Clone))]
-pub(crate) struct RatchetSecret {
+pub struct RatchetSecret {
     secret: Secret,
     generation: Generation,
 }
@@ -102,7 +102,7 @@ pub(crate) struct RatchetSecret {
 impl RatchetSecret {
     /// Create an initial [`RatchetSecret`] with `generation = 0` from the given
     /// [`Secret`].
-    pub(crate) fn initial_ratchet_secret(secret: Secret) -> Self {
+    pub fn initial_ratchet_secret(secret: Secret) -> Self {
         Self {
             secret,
             generation: 0,
@@ -110,13 +110,13 @@ impl RatchetSecret {
     }
 
     /// Return the generation of this [`RatchetSecret`].
-    pub(crate) fn generation(&self) -> Generation {
+    pub fn generation(&self) -> Generation {
         self.generation
     }
 
     /// Consume this [`RatchetSecret`] to derive a pair of [`RatchetSecrets`],
     /// as well as the [`RatchetSecret`] of the next generation and return both.
-    pub(crate) fn ratchet_forward(
+    pub fn ratchet_forward(
         &mut self,
         crypto: &impl OpenMlsCrypto,
         ciphersuite: Ciphersuite,

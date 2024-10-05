@@ -37,7 +37,7 @@ pub(crate) struct FramedContent {
     pub(super) sender: Sender,
     pub(super) authenticated_data: VLBytes,
 
-    pub(super) body: FramedContentBody,
+    pub body: FramedContentBody,
 }
 
 impl From<AuthenticatedContent> for FramedContent {

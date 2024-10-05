@@ -12,14 +12,15 @@ use openmls_traits::{
 use signable::SignedStruct;
 
 use std::hash::Hash;
-
-mod aead;
+/// aead
+pub mod aead;
 mod codec;
 pub(crate) mod hpke;
 mod kdf_label;
 mod mac;
 mod reuse_guard;
-mod secret;
+/// secret
+pub mod secret;
 
 // Public
 pub mod hash_ref;

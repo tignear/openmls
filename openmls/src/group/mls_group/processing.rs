@@ -147,7 +147,56 @@ impl MlsGroup {
             create_commit_result.group_info,
         ))
     }
+    /// Creates a Commit message that covers the pending proposals that are
+    /// currently stored in the group's [ProposalStore]. The Commit message is
+    /// created even if there are no valid pending proposals.
+    ///
+    /// Returns an error if there is a pending commit. Otherwise it returns a
+    /// tuple of `Commit, Option<Welcome>, Option<GroupInfo>`, where `Commit`
+    /// and [`Welcome`] are MlsMessages of the type [`MlsMessageOut`].
+    ///
+    /// [`Welcome`]: crate::messages::Welcome
+    // FIXME: #1217
+    #[allow(clippy::type_complexity)]
+    pub fn commit_to_pending_proposals_raw<Provider: OpenMlsProvider>(
+        &mut self,
+        provider: &Provider,
+        signer: &impl Signer,
+    ) -> Result<
+        (MlsMessageOut, Option<Welcome>, Option<GroupInfo>),
+        CommitToPendingProposalsError<Provider::StorageError>,
+    > {
+        self.is_operational()?;
 
+        // Create Commit over all pending proposals
+        // TODO #751
+        let params = CreateCommitParams::builder()
+            .framing_parameters(self.framing_parameters())
+            .force_self_update(false)
+            .build();
+        let create_commit_result = self.create_commit(params, provider, signer)?;
+
+        // Convert PublicMessage messages to MLSMessage and encrypt them if required by
+        // the configuration
+        let mls_message = self.content_to_mls_message(create_commit_result.commit, provider)?;
+
+        // Set the current group state to [`MlsGroupState::PendingCommit`],
+        // storing the current [`StagedCommit`] from the commit results
+        self.group_state = MlsGroupState::PendingCommit(Box::new(PendingCommitState::Member(
+            create_commit_result.staged_commit,
+        )));
+        provider
+            .storage()
+            .write_group_state(self.group_id(), &self.group_state)
+            .map_err(CommitToPendingProposalsError::StorageError)?;
+        self.reset_aad();
+
+        Ok((
+            mls_message,
+            create_commit_result.welcome_option,
+            create_commit_result.group_info,
+        ))
+    }
     /// Merge a [StagedCommit] into the group after inspection. As this advances
     /// the epoch of the group, it also clears any pending commits.
     pub fn merge_staged_commit<Provider: OpenMlsProvider>(
@@ -324,7 +373,7 @@ impl MlsGroup {
                     FramedContentBody::Application(_) => {
                         Err(ProcessMessageError::UnauthorizedExternalApplicationMessage)
                     }
-                    FramedContentBody::Proposal(Proposal::Remove(_)) => {
+                    FramedContentBody::Proposal(Proposal::Remove(_) | Proposal::Add(_)) => {
                         let content = ProcessedMessageContent::ProposalMessage(Box::new(
                             QueuedProposal::from_authenticated_content_by_ref(
                                 self.ciphersuite(),
